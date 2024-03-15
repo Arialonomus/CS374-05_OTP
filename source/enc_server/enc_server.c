@@ -82,12 +82,26 @@ int main(int argc, char* argv[])
   // Free memory for the linked list of addresses
   freeaddrinfo(result);
 
+  // Begin listening on the opened socket
+  if (listen(server_socket, QUEUE_LIMIT) == -1) {
+    err(EXIT_FAILURE, "listen");
+  }
+
+  // Set up signal handling for zombie processes
+  struct sigaction disposition;
+  sigemptyset(&disposition.sa_mask);
+  disposition.sa_flags = SA_RESTART;
+  disposition.sa_handler = reap;
+  if (sigaction(SIGCHLD, &disposition, NULL) == -1) {
+    err(EXIT_FAILURE, "sigaction");
+  }
+
   // Handle client requests
   for (;;) {
     // Accept a client connection, obtaining client's address
     struct sockaddr_storage client_address;
     socklen_t addrlen = sizeof(client_address);
-    int client_socket = accept(server_socket, (struct sockaddr*) &client_address, &addrlen);
+    int const client_socket = accept(server_socket, (struct sockaddr*) &client_address, &addrlen);
     if (client_socket == -1) {
       warnx("error: accept");
       continue;
