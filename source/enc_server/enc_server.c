@@ -22,11 +22,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <netdb.h>
 
 #include "address.h"
-#include "cryptography.h"
+#include "server.h"
 
 int main(int argc, char* argv[])
 {
@@ -54,34 +53,68 @@ int main(int argc, char* argv[])
   }
 
   // Attempt to bind to each address until successful
-  int socket_fd = 0;
+  int server_socket = 0;
   int optval = 1;
-  struct addrinfo* r_ptr = NULL;
-  for (r_ptr = result; r_ptr != NULL; r_ptr = r_ptr->ai_next) {
+  struct addrinfo* res_iter = NULL;
+  for (res_iter = result; res_iter != NULL; res_iter = res_iter->ai_next) {
     // Attempt to open the socket, continue if unable
-    socket_fd = socket(r_ptr->ai_family, r_ptr->ai_socktype, r_ptr->ai_protocol);
-    if (socket_fd == -1) continue;
-    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
+    server_socket = socket(res_iter->ai_family, res_iter->ai_socktype, res_iter->ai_protocol);
+    if (server_socket == -1) continue;
+    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
       err(EXIT_FAILURE, "setsockopt");
     }
 
     // Bind successful, exit loop
-    if (bind(socket_fd, r_ptr->ai_addr, r_ptr->ai_addrlen) == 0) {
+    if (bind(server_socket, res_iter->ai_addr, res_iter->ai_addrlen) == 0) {
       break;
     }
 
     // Bind faied, close socket and continue
     else {
-      close(socket_fd);
+      close(server_socket);
     }
   }
   // Failed to bind to any socket
-  if (r_ptr == NULL) {
+  if (res_iter == NULL) {
     errx(EXIT_FAILURE, "could not bind socket to any address");
   }
 
   // Free memory for the linked list of addresses
   freeaddrinfo(result);
 
+  // Handle client requests
+  for (;;) {
+    // Accept a client connection, obtaining client's address
+    struct sockaddr_storage client_address;
+    socklen_t addrlen = sizeof(client_address);
+    int client_socket = accept(server_socket, (struct sockaddr*) &client_address, &addrlen);
+    if (client_socket == -1) {
+      warnx("error: accept");
+      continue;
+    }
+
+    // Fork a child process to execute the encryption
+    switch(fork()) {
+      // Error
+      case -1:
+        warn("fork");
+        close(client_socket);
+        break;
+
+      // Child Process
+      case 0:
+        close(server_socket);
+        handle_encryption();
+        goto exit;  // Exit infinite loop when processing is complete
+
+      // Parent Process
+      default:
+        close(client_socket);
+        break;
+    }
+
+  }
+
+  exit:
   return EXIT_SUCCESS;
 }
