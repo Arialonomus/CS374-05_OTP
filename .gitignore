@@ -1,7 +1,8 @@
 bin/
 .idea/
+.vscode/
 test/
 build/
 skeleton/
-makefile
+source/keygen/makefile
 .o
