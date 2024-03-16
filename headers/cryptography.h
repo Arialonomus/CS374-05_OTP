@@ -16,9 +16,10 @@
 #define CHAR_MAX 90
 #define CHAR_MIN 65
 #define CHAR_OFFSET CHAR_MIN
-#define RAND_RANGE (CHAR_MAX - CHAR_MIN) + 2
-#define SPACE_VALUE RAND_RANGE - 1
-#define MODULO RAND_RANGE - 1
+#define RANGE ((CHAR_MAX - CHAR_MIN) + 2)
+#define SPACE_VALUE (RANGE - 1)
+
+#include <stdlib.h>
 
 // Returns an encoded ciphertext char based on a passed in pair of plaintext and key characters
 char encode(const char pair[]);

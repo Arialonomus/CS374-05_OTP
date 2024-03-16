@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <ctype.h>
+
 #include "cryptography.h"
 
 int main(int argc, char *argv[])
@@ -28,12 +29,14 @@ int main(int argc, char *argv[])
     if (argc != 2 || atoi(argv[1]) < 1)
         errx(EXIT_FAILURE, "only one argument must be provided, consisting of a non-negative integer");
     const size_t key_len = atoi(argv[1]);
-    char key_buf[key_len];
+    char* key_buf = malloc(key_len + 1);
+    if (key_buf == NULL)
+        err(EXIT_FAILURE, "malloc");
     srand(time(NULL));
 
     // Generate a string of random letters and the space character
     for (int i = 0; i < key_len; ++i) {
-        const int num = 0 + rand() % RAND_RANGE;
+        const int num = 0 + rand() % RANGE;
         key_buf[i] = num == SPACE_VALUE ? ' ' : num + CHAR_OFFSET;
     }
 
@@ -41,7 +44,9 @@ int main(int argc, char *argv[])
     key_buf[key_len] = '\0';
     fputs(key_buf, stdout);
     fputc('\n', stdout);
-    fflush(stdout);
 
+    // Cleanup and exit
+    free(key_buf);
+    fflush(stdout);
     return EXIT_SUCCESS;
 }
