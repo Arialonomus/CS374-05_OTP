@@ -18,5 +18,9 @@
 #define CHAR_OFFSET CHAR_MIN
 #define RAND_RANGE (CHAR_MAX - CHAR_MIN) + 2
 #define SPACE_VALUE RAND_RANGE - 1
+#define MODULO RAND_RANGE - 1
+
+// Returns a ciphertext char based on a passed in pair of plaintext char and key char
+char encrypt(char pair[]);
 
 #endif //OTP_CRYPTOGRAPHY_H
