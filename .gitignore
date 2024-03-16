@@ -4,5 +4,6 @@ bin/
 test/
 build/
 skeleton/
+finished/
 source/keygen/makefile
 .o
