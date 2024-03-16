@@ -2,8 +2,8 @@
  * for the one-time pad system
  */
 
-#ifndef OTP_SERVER_H
-#define OTP_SERVER_H
+#ifndef OTP_SERVERUTILITIES_H
+#define OTP_SERVERUTILITIES_H
 
 #ifndef QUEUE_LIMIT
 #define QUEUE_LIMIT 5
@@ -29,4 +29,4 @@ int fetch_pair(int fd, char pair_buf[]);
 // Signal handler to reap all zombie processes
 void reap(int sig);
 
-#endif //OTP_SERVER_H
+#endif //OTP_SERVERUTILITIES_H
