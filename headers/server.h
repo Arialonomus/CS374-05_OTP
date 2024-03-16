@@ -18,11 +18,15 @@
 #include <signal.h>
 #include <stddef.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include "cryptography.h"
 
 // Receive a key and plaintext from a client and send back an encrypted string
-void handle_encryption(void);
+void handle_encryption(int socket_fd);
+
+// Fetches a pair of characters from a socket stream, returns 2 on success, 0 on EOF, otherwise returns -1
+int fetch_pair(int fd, char pair_buf[])
 
 // Signal handler to reap all zombie processes
 void reap(int sig);

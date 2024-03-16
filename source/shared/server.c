@@ -2,9 +2,29 @@
 
 #include <stdlib.h>
 
-void handle_encryption()
+void handle_encryption(const int socket_fd)
 {
+   // Retrieve plaintext and a key and send back the encrypted ciphertext
+    for(;;) {
+        char pair[2];
 
+        // Read a pair of characters from the stream
+        switch (fetch_pair(socket_fd, pair)) {
+            // Error
+            case -1:
+                err(EXIT_FAILURE, "fetch_pair");
+            // EOF
+            case 0:
+                close(socket_fd);
+                return;
+            default:
+                break;
+        }
+
+        // Encrypt the characters and send back to client
+        char cipher = encrypt(pair);
+        write(socket_fd, &cipher, 1);
+    }
 }
 
 int fetch_pair(const int fd, char pair_buf[])
