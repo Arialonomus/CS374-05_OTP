@@ -16,12 +16,12 @@
 #endif
 
 #include <err.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <fcntl.h>
 
 #include "address.h"
 #include "client.h"
@@ -89,7 +89,6 @@ int main(int argc, char* argv[])
 
     // Attempt to bind to each address until successful
     int socket_fd = 0;
-    int optval = 1;
     struct addrinfo* res_iter = NULL;
     for (res_iter = result; res_iter != NULL; res_iter = res_iter->ai_next) {
         // Attempt to open the socket, continue if unable
@@ -114,10 +113,36 @@ int main(int argc, char* argv[])
     // Free memory for the linked list of addresses
     freeaddrinfo(result);
 
-    // Send plaintext and key to encryption server
+    // Send plaintext and key to encryption server in character pairs
+    for (int i = 0; i < n_textchars; ++i) {
+        char pair[2];
+        pair[CHAR_INDEX] = plaintext[i];
+        pair[KEY_INDEX] = key[i];
+        if(write(socket_fd, &pair, 2) == -1)
+            err(EXIT_FAILURE, "write");
+    }
 
+    // Close write end of the socket
+    shutdown(socket_fd, SHUT_WR);
 
     // Read encrypted ciphertext from data stream
+    for(;;) {
+        // Read a character from the stream
+        char c = 0;
+        const int num_read = read(socket_fd, &c, 1);
+        if (num_read == -1) {
+            if (errno == EINTR)     // Interrupted, retry on next loop
+                continue;
+            err(EXIT_FAILURE, "read");
+        }
+        if (num_read == 0)
+            break;
+
+        // Write the character to output
+        if(fputc(c, stdout) == EOF )
+            err(EXIT_FAILURE, "fputc");
+    }
+    close(socket_fd);
 
     // Cleanup & Exit
     free(plaintext);
