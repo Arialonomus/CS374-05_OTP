@@ -23,7 +23,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-#include "address.h"
+#include "network.h"
 #include "client.h"
 
 int main(int argc, char* argv[])
@@ -52,7 +52,6 @@ int main(int argc, char* argv[])
         err(EXIT_FAILURE, "malloc: plaintext");
     const int n_textchars = readfile(plaintext_file, plaintext_filename, &plaintext, &text_buf_size);
     if (n_textchars == -1) {
-        free(plaintext);
         exit(EXIT_FAILURE);
     }
     fclose(plaintext_file);
@@ -70,68 +69,37 @@ int main(int argc, char* argv[])
         err(EXIT_FAILURE, "malloc: key");
     const int n_keychars = readfile(key_file, key_filename, &key, &key_buf_size);
     if (n_keychars == -1) {
-        free(key);
         exit(EXIT_FAILURE);
     }
     fclose(plaintext_file);
+
+    // Validate key and text are the same length
     if (n_keychars != n_textchars)
         errx(EXIT_FAILURE, "plaintext and key strings are not the same length");
 
-    // Retrieve a list of potential addresses for binding
-    struct addrinfo const hints = {
-        .ai_family = AF_UNSPEC,
-        .ai_socktype = SOCK_STREAM,
-        .ai_flags = 0,
-        .ai_protocol = 0,
-    };
-    struct addrinfo* result;
-    if (getaddrinfo("localhost", port_num_str, &hints, &result) != 0) {
-        err(EXIT_FAILURE, "getaddrinfo");
+    // Attempt to open a connection to the socket at target port
+    const int connection_fd = open_socket(port_num_str, CLIENT);
+    if (connection_fd == -1) {
+        exit(EXIT_FAILURE);
     }
-
-    // Attempt to bind to each address until successful
-    int socket_fd = 0;
-    struct addrinfo* res_iter = NULL;
-    for (res_iter = result; res_iter != NULL; res_iter = res_iter->ai_next) {
-        // Attempt to open the socket, continue if unable
-        socket_fd = socket(res_iter->ai_family, res_iter->ai_socktype, res_iter->ai_protocol);
-        if (socket_fd == -1) continue;
-
-        // Connection successful, exit loop
-        if (connect(socket_fd, res_iter->ai_addr, res_iter->ai_addrlen) == 0) {
-            break;
-        }
-
-        // Connection faied, close socket and continue
-        else {
-            close(socket_fd);
-        }
-    }
-    // Failed to connect to any socket
-    if (res_iter == NULL) {
-        errx(EXIT_FAILURE, "all connection attempts failed");
-    }
-
-    // Free memory for the linked list of addresses
-    freeaddrinfo(result);
 
     // Send plaintext and key to encryption server in character pairs
     for (int i = 0; i < n_textchars; ++i) {
         char pair[2];
         pair[CHAR_INDEX] = plaintext[i];
         pair[KEY_INDEX] = key[i];
-        if(write(socket_fd, &pair, 2) == -1)
+        if(write(connection_fd, &pair, 2) == -1)
             err(EXIT_FAILURE, "write");
     }
 
     // Close write end of the socket
-    shutdown(socket_fd, SHUT_WR);
+    shutdown(connection_fd, SHUT_WR);
 
     // Read encrypted ciphertext from data stream
     for(;;) {
         // Read a character from the stream
         char c = 0;
-        const int num_read = read(socket_fd, &c, 1);
+        const int num_read = read(connection_fd, &c, 1);
         if (num_read == -1) {
             if (errno == EINTR)     // Interrupted, retry on next loop
                 continue;
@@ -144,7 +112,7 @@ int main(int argc, char* argv[])
         if(fputc(c, stdout) == EOF )
             err(EXIT_FAILURE, "fputc");
     }
-    close(socket_fd);
+    close(connection_fd);
 
     // Cleanup & Exit
     free(plaintext);

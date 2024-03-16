@@ -25,66 +25,30 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "address.h"
+#include "network.h"
 #include "serverutilities.h"
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // Check arg count
     if (argc != 2) {
         errx(EXIT_FAILURE, "invalid number of arguments");
     }
     // Validate port number
-    const char *port_num_str = argv[1];
+    const char* port_num_str = argv[1];
     const int port_num = atoi(port_num_str);
     if (port_num > MAX_PORT_NUMBER || port_num < 0) {
         errx(EXIT_FAILURE, "invalid socket number");
     }
 
-    // Retrieve a list of potential addresses for binding
-    struct addrinfo const hints = {
-        .ai_family = AF_UNSPEC,
-        .ai_socktype = SOCK_STREAM,
-        .ai_flags = AI_PASSIVE,
-        .ai_protocol = 0,
-    };
-    struct addrinfo *result;
-    if (getaddrinfo(0, port_num_str, &hints, &result) != 0) {
-        err(EXIT_FAILURE, "getaddrinfo");
+    // Attempt to open a socket for listening
+    int listener_fd = open_socket(port_num_str, SERVER);
+    if (listener_fd == -1) {
+        exit(EXIT_FAILURE);
     }
-
-    // Attempt to bind to each address until successful
-    int server_socket = 0;
-    int optval = 1;
-    struct addrinfo *res_iter = NULL;
-    for (res_iter = result; res_iter != NULL; res_iter = res_iter->ai_next) {
-        // Attempt to open the socket, continue if unable
-        server_socket = socket(res_iter->ai_family, res_iter->ai_socktype, res_iter->ai_protocol);
-        if (server_socket == -1) continue;
-        if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
-            err(EXIT_FAILURE, "setsockopt");
-        }
-
-        // Bind successful, exit loop
-        if (bind(server_socket, res_iter->ai_addr, res_iter->ai_addrlen) == 0) {
-            break;
-        }
-
-        // Bind faied, close socket and continue
-        else {
-            close(server_socket);
-        }
-    }
-    // Failed to bind to any socket
-    if (res_iter == NULL) {
-        errx(EXIT_FAILURE, "could not bind socket to any address");
-    }
-
-    // Free memory for the linked list of addresses
-    freeaddrinfo(result);
 
     // Begin listening on the opened socket
-    if (listen(server_socket, QUEUE_LIMIT) == -1) {
+    if (listen(listener_fd, QUEUE_LIMIT) == -1) {
         err(EXIT_FAILURE, "listen");
     }
 
@@ -99,11 +63,11 @@ int main(int argc, char *argv[])
 
     // Handle client requests
     for (;;) {
-        // Accept a client connection, obtaining client's address
+        // Accept a client connection, obtaining client's address and opening a socket
         struct sockaddr_storage client_address;
         socklen_t addrlen = sizeof(client_address);
-        int const client_socket = accept(server_socket, (struct sockaddr *) &client_address, &addrlen);
-        if (client_socket == -1) {
+        int const client_fd = accept(listener_fd, (struct sockaddr*) &client_address, &addrlen);
+        if (client_fd == -1) {
             warnx("error: accept");
             continue;
         }
@@ -113,18 +77,18 @@ int main(int argc, char *argv[])
             // Error
             case -1:
                 warn("fork");
-                close(client_socket); // Unnecessary copy of listening socket
+                close(client_fd); // Close copy of the client socket
                 break;
 
             // Child Process
             case 0:
-                close(server_socket);
-                handle_request(client_socket);
+                close(listener_fd);
+                handle_request(client_fd);
                 goto exit; // Exit infinite loop when processing is complete
 
             // Parent Process
             default:
-                close(client_socket); // Unnecessary copy of connected socket
+                close(client_fd); // Unnecessary copy of connected socket
                 break;
         }
     }
