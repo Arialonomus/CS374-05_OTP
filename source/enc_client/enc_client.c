@@ -33,23 +33,24 @@ int main(int argc, char* argv[])
         errx(EXIT_FAILURE, "invalid number of arguments");
     }
     // Validate port number
-    const char* port_num_str = argv[4];
+    const char* port_num_str = argv[3];
     const int port_num = atoi(port_num_str);
     if (port_num > MAX_PORT_NUMBER || port_num < 0) {
         errx(EXIT_FAILURE, "invalid port number");
     }
 
     // Open the plaintext file
-    FILE* plaintext_file = fopen(argv[2], "r");
+    const char* plaintext_filename = argv[1];
+    FILE* plaintext_file = fopen(plaintext_filename, "r");
     if (plaintext_file == NULL)
-        err(EXIT_FAILURE, "open: %s", argv[2]);
+        err(EXIT_FAILURE, "open: %s", plaintext_filename);
 
     // Read plaintext file into buffer
     size_t text_buf_size = 256;
     char* plaintext = malloc(text_buf_size);
     if (plaintext == NULL)
         err(EXIT_FAILURE, "malloc: plaintext");
-    const int n_textchars = readfile(plaintext_file, &plaintext, &text_buf_size);
+    const int n_textchars = readfile(plaintext_file, plaintext_filename, &plaintext, &text_buf_size);
     if (n_textchars == -1) {
         free(plaintext);
         exit(EXIT_FAILURE);
@@ -57,16 +58,17 @@ int main(int argc, char* argv[])
     fclose(plaintext_file);
 
     // Open the key file
-    FILE* key_file = fopen(argv[3], "r");
+    const char* key_filename = argv[2];
+    FILE* key_file = fopen(key_filename, "r");
     if (key_file == NULL)
-        err(EXIT_FAILURE, "open: %s", argv[3]);
+        err(EXIT_FAILURE, "open: %s", key_filename);
 
     // Read key file into buffer
     size_t key_buf_size = n_textchars;
     char* key = malloc(n_textchars);
     if (key == NULL)
         err(EXIT_FAILURE, "malloc: key");
-    const int n_keychars = readfile(key_file, &key, &key_buf_size);
+    const int n_keychars = readfile(key_file, key_filename, &key, &key_buf_size);
     if (n_keychars == -1) {
         free(key);
         exit(EXIT_FAILURE);

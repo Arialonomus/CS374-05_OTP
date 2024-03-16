@@ -1,6 +1,6 @@
 #include "client.h"
 
-int readfile(FILE* file, char** buffer, size_t* buf_size)
+int readfile(FILE* file, const char* filename, char** buffer, size_t* buf_size)
 {
     // Process file until newline or EOF is read
     char c = 0;
@@ -14,7 +14,7 @@ int readfile(FILE* file, char** buffer, size_t* buf_size)
                 warn("fgetc");
                 return -1;
             }
-            warnx("file does not contain newline");
+            warnx("%s does not contain newline", filename);
             return -1;
         }
 

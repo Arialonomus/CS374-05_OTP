@@ -19,6 +19,6 @@
 
 // Reads the contents of a text file into a buffer, resizing the buffer if necessary
 // Returns number of bytes read, or -1 on error
-int readfile(FILE* file, char** buffer, size_t* buf_size);
+int readfile(FILE* file, const char* filename, char** buffer, size_t* buf_size);
 
 #endif //OTP_CLIENT_H
