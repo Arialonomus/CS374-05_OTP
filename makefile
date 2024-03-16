@@ -1,13 +1,21 @@
 CC = gcc
-CFLAGS = -std=c99 -Iinclude
-DEBUGFLAGS = -g
-RELEASEFLAGS = -O2
+CFLAGS = -std=c99 -Iheaders
+DEBUG_FLAGS = -g
+RELEASE_FLAGS = -O2
 LDFLAGS =
 
 # Define the source directory, output binary directory, and build directory
 SRC_DIR = source
 BIN_DIR = bin
 BUILD_DIR = build
+
+#Sources for each program
+SHARED_SRC = $(wildcard $(SRC_DIR)/shared/*.c)
+KEYGEN_SRC = $(wildcard $(SRC_DIR)/keygen/*.c)
+ENC_SERVER_SRC = $(wildcard $(SRC_DIR)/enc_server/*.c)
+ENC_CLIENT_SRC = $(wildcard $(SRC_DIR)/enc_client/*.c)
+DEC_SERVER_SRC = $(wildcard $(SRC_DIR)/dec_server/*.c)
+DEC_CLIENT_SRC = $(wildcard $(SRC_DIR)/dec_client/*.c)
 
 # Programs
 PROGRAMS = keygen dec_server dec_client enc_server enc_client
@@ -24,49 +32,49 @@ all: release debug
 # Program specific build commands
 keygen: release_keygen debug_keygen
 
-dec_server: release_dec_server debug_dec_server
-
-dec_client: release_dec_client debug_dec_client
-
 enc_server: release_enc_server debug_enc_server
 
 enc_client: release_enc_client debug_enc_client
 
+dec_server: release_dec_server debug_dec_server
+
+dec_client: release_dec_client debug_dec_client
+
 # Release builds
-release: release_keygen release_dec_server release_dec_client release_enc_server release_enc_client
+release: release_keygen release_enc_server release_enc_client release_dec_server release_dec_client
 
 release_keygen:
-	$(CC) $(CFLAGS) $(RELEASEFLAGS) $(SRC_DIR)/keygen/keygen.c -o $(BIN_DIR)/release/keygen
-
-release_dec_server:
-	$(CC) $(CFLAGS) $(RELEASEFLAGS) $(SRC_DIR)/dec_server/*.c -o $(BIN_DIR)/release/dec_server
-
-release_dec_client:
-	$(CC) $(CFLAGS) $(RELEASEFLAGS) $(SRC_DIR)/dec_client/*.c -o $(BIN_DIR)/release/dec_client
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(KEYGEN_SRC) -o $(BIN_DIR)/release/keygen
 
 release_enc_server:
-	$(CC) $(CFLAGS) $(RELEASEFLAGS) $(SRC_DIR)/enc_server/*.c -o $(BIN_DIR)/release/enc_server
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(ENC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_server
 
 release_enc_client:
-	$(CC) $(CFLAGS) $(RELEASEFLAGS) $(SRC_DIR)/enc_client/*.c -o $(BIN_DIR)/release/enc_client
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(ENC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_client
+
+release_dec_server:
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(DEC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_server
+
+release_dec_client:
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(DEC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_client
 
 # Debug builds
-debug: debug_keygen debug_dec_server debug_dec_client debug_enc_server debug_enc_client
+debug: debug_keygen debug_enc_server debug_enc_client debug_dec_server debug_dec_client
 
 debug_keygen:
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(SRC_DIR)/keygen/*.c -o $(BIN_DIR)/debug/keygen
-
-debug_dec_server:
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(SRC_DIR)/dec_server/*.r.c -o $(BIN_DIR)/debug/dec_server
-
-debug_dec_client:
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(SRC_DIR)/dec_client/*.c -o $(BIN_DIR)/debug/dec_client
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(KEYGEN_SRC) -o $(BIN_DIR)/debug/keygen
 
 debug_enc_server:
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(SRC_DIR)/enc_server/*.c -o $(BIN_DIR)/debug/enc_server
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(ENC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_server
 
 debug_enc_client:
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(SRC_DIR)/enc_client/*.c -o $(BIN_DIR)/debug/enc_client
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(ENC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_client
+
+debug_dec_server:
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(DEC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_server
+
+debug_dec_client:
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(DEC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_client
 
 # Clean up build and bin directories
 clean:
