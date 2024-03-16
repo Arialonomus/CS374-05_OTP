@@ -9,9 +9,9 @@
 #define QUEUE_LIMIT 5
 #endif
 
+#include <stdlib.h>
 #include <err.h>
 #include <errno.h>
-#include <signal.h>
 #include <stddef.h>
 #include <sys/wait.h>
 #include <unistd.h>

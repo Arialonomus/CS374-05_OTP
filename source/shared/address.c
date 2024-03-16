@@ -1,9 +1,9 @@
 #include "address.h"
 
-void configure_address(struct sockaddr_in* address, const int port_num)
+void configure_address(struct sockaddr_in *address, const int port_num)
 {
     // Clear out the address struct
-    memset((char*) address, '\0', sizeof(*address));
+    memset((char *) address, '\0', sizeof(*address));
 
     // The address should be network capable
     address->sin_family = AF_INET;

@@ -1,14 +1,11 @@
 #include "server.h"
 
-#include <stdlib.h>
-
 void handle_encryption(const int socket_fd)
 {
    // Retrieve plaintext and a key and send back the encrypted ciphertext
     for(;;) {
-        char pair[2];
-
         // Read a pair of characters from the stream
+        char pair[2];
         switch (fetch_pair(socket_fd, pair)) {
             // Error
             case -1:
