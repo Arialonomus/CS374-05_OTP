@@ -23,7 +23,8 @@ void handle_encryption(const int socket_fd)
 
         // Encrypt the characters and send back to client
         char cipher = encrypt(pair);
-        write(socket_fd, &cipher, 1);
+        if(write(socket_fd, &cipher, 1) == -1)
+            err(EXIT_FAILURE, "write");
     }
 }
 
