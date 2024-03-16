@@ -9,6 +9,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef CHAR_INDEX
+#define CHAR_INDEX 0
+#endif
+
+#ifndef KEY_INDEX
+#define KEY_INDEX 1
+#endif
+
 // Reads the contents of a text file into a buffer, resizing the buffer if necessary
 // Returns number of bytes read, or -1 on error
 int readfile(FILE* file, char** buffer, size_t* buf_size);
