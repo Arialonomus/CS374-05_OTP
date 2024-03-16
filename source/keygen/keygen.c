@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
     // Append null terminator and print string
     key_buf[key_len] = '\0';
     fputs(key_buf, stdout);
+    fputc('\n', stdout);
     fflush(stdout);
 
     return EXIT_SUCCESS;
