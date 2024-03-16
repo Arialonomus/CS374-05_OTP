@@ -1,8 +1,8 @@
-/* This file contains functions related to address handling for network sockets
+/* This file contains functions and constants related to address handling for network sockets
  */
 
-#ifndef ADDRESS_H
-#define ADDRESS_H
+#ifndef OTP_ADDRESS_H
+#define OTP_ADDRESS_H
 
 #include <stdio.h>
 #include <string.h>
@@ -13,11 +13,4 @@
 #define MAX_PORT_NUMBER 65535
 #endif
 
-#ifndef BACKLOG
-#define MAX_PORT_NUMBER 5
-#endif
-
-// Set up the address struct for the server socket
-void configure_address(struct sockaddr_in* address, int port_num);
-
-#endif //ADDRESS_H
+#endif //OTP_ADDRESS_H

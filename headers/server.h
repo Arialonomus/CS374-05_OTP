@@ -5,10 +5,6 @@
 #ifndef OTP_SERVER_H
 #define OTP_SERVER_H
 
-#ifndef  MAX_PORT_NUMBER
-#define MAX_PORT_NUMBER 65535
-#endif
-
 #ifndef QUEUE_LIMIT
 #define QUEUE_LIMIT 5
 #endif
@@ -26,7 +22,7 @@
 void handle_encryption(int socket_fd);
 
 // Fetches a pair of characters from a socket stream, returns 2 on success, 0 on EOF, otherwise returns -1
-int fetch_pair(int fd, char pair_buf[])
+int fetch_pair(int fd, char pair_buf[]);
 
 // Signal handler to reap all zombie processes
 void reap(int sig);
