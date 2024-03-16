@@ -3,6 +3,7 @@ CFLAGS = -std=c99 -Iheaders
 DEBUG_FLAGS = -g
 RELEASE_FLAGS = -O2
 LDFLAGS =
+ENC_FLAG = -DENC
 
 # Define the source directory, output binary directory, and build directory
 SRC_DIR = source
@@ -12,9 +13,8 @@ BUILD_DIR = build
 #Sources for each program
 SHARED_SRC = $(wildcard $(SRC_DIR)/shared/*.c)
 KEYGEN_SRC = $(wildcard $(SRC_DIR)/keygen/*.c)
-ENC_SERVER_SRC = $(wildcard $(SRC_DIR)/enc_server/*.c)
+SERVER_SRC = $(wildcard $(SRC_DIR)/server/*.c)
 ENC_CLIENT_SRC = $(wildcard $(SRC_DIR)/enc_client/*.c)
-DEC_SERVER_SRC = $(wildcard $(SRC_DIR)/dec_server/*.c)
 DEC_CLIENT_SRC = $(wildcard $(SRC_DIR)/dec_client/*.c)
 
 # Programs
@@ -47,13 +47,13 @@ release_keygen:
 	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(KEYGEN_SRC) -o $(BIN_DIR)/release/keygen
 
 release_enc_server:
-	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(ENC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_server
+	$(CC) $(CFLAGS) $(ENC_FLAG) $(RELEASE_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_server
 
 release_enc_client:
 	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(ENC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_client
 
 release_dec_server:
-	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(DEC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_server
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_server
 
 release_dec_client:
 	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(DEC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_client
@@ -65,13 +65,13 @@ debug_keygen:
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(KEYGEN_SRC) -o $(BIN_DIR)/debug/keygen
 
 debug_enc_server:
-	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(ENC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_server
+	$(CC) $(CFLAGS) $(ENC_FLAG) $(DEBUG_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_server
 
 debug_enc_client:
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(ENC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_client
 
 debug_dec_server:
-	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(DEC_SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_server
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_server
 
 debug_dec_client:
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(DEC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_client

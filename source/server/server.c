@@ -1,5 +1,5 @@
 /* Assignment: CS 374 Assignment 05 - OTP
- * Program: enc_server
+ * Program: enc_server / dec_server
  * Author: Jacob Barber
  * UID: 934561945
  *
@@ -16,15 +16,17 @@
 #endif
 
 #include <err.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netdb.h>
+#include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "address.h"
-#include "server.h"
+#include "serverutilities.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,7 +35,7 @@ int main(int argc, char *argv[])
         errx(EXIT_FAILURE, "invalid number of arguments");
     }
     // Validate port number
-    const char *port_num_str = argv[2];
+    const char *port_num_str = argv[1];
     const int port_num = atoi(port_num_str);
     if (port_num > MAX_PORT_NUMBER || port_num < 0) {
         errx(EXIT_FAILURE, "invalid socket number");
@@ -128,6 +130,6 @@ int main(int argc, char *argv[])
     }
 
     // Cleanup & Exit
-exit:
+    exit:
     return EXIT_SUCCESS;
 }
