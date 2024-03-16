@@ -2,8 +2,8 @@
  * processes for a one-time pad system
  */
 
-#ifndef OTP_CLIENT_H
-#define OTP_CLIENT_H
+#ifndef OTP_CLIENTUTILITIES_H
+#define OTP_CLIENTUTILITIES_H
 
 #include <err.h>
 #include <stdio.h>
@@ -21,4 +21,4 @@
 // Returns number of bytes read, or -1 on error
 int readfile(FILE* file, const char* filename, char** buffer, size_t* buf_size);
 
-#endif //OTP_CLIENT_H
+#endif //OTP_CLIENTUTILITIES_H

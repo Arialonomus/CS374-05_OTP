@@ -17,14 +17,14 @@
 
 #include <err.h>
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netdb.h>
+#include <unistd.h>
 
 #include "network.h"
-#include "client.h"
+#include "clientutilities.h"
 
 int main(int argc, char* argv[])
 {
@@ -39,22 +39,22 @@ int main(int argc, char* argv[])
         errx(EXIT_FAILURE, "invalid port number");
     }
 
-    // Open the plaintext file
-    const char* plaintext_filename = argv[1];
-    FILE* plaintext_file = fopen(plaintext_filename, "r");
-    if (plaintext_file == NULL)
-        err(EXIT_FAILURE, "open: %s", plaintext_filename);
+    // Open the text file
+    const char* text_filename = argv[1];
+    FILE* text_file = fopen(text_filename, "r");
+    if (text_file == NULL)
+        err(EXIT_FAILURE, "open: %s", text_filename);
 
-    // Read plaintext file into buffer
+    // Read text file into buffer
     size_t text_buf_size = 256;
-    char* plaintext = malloc(text_buf_size);
-    if (plaintext == NULL)
-        err(EXIT_FAILURE, "malloc: plaintext");
-    const int n_textchars = readfile(plaintext_file, plaintext_filename, &plaintext, &text_buf_size);
+    char* text = malloc(text_buf_size);
+    if (text == NULL)
+        err(EXIT_FAILURE, "malloc: text");
+    const int n_textchars = readfile(text_file, text_filename, &text, &text_buf_size);
     if (n_textchars == -1) {
         exit(EXIT_FAILURE);
     }
-    fclose(plaintext_file);
+    fclose(text_file);
 
     // Open the key file
     const char* key_filename = argv[2];
@@ -71,11 +71,11 @@ int main(int argc, char* argv[])
     if (n_keychars == -1) {
         exit(EXIT_FAILURE);
     }
-    fclose(plaintext_file);
+    fclose(text_file);
 
     // Validate key and text are the same length
     if (n_keychars != n_textchars)
-        errx(EXIT_FAILURE, "plaintext and key strings are not the same length");
+        errx(EXIT_FAILURE, "text and key strings are not the same length");
 
     // Attempt to open a connection to the socket at target port
     const int connection_fd = open_socket(port_num_str, CLIENT);
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     // Send plaintext and key to encryption server in character pairs
     for (int i = 0; i < n_textchars; ++i) {
         char pair[2];
-        pair[CHAR_INDEX] = plaintext[i];
+        pair[CHAR_INDEX] = text[i];
         pair[KEY_INDEX] = key[i];
         if(write(connection_fd, &pair, 2) == -1)
             err(EXIT_FAILURE, "write");
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     close(connection_fd);
 
     // Cleanup & Exit
-    free(plaintext);
+    free(text);
     free(key);
     return EXIT_SUCCESS;
 }

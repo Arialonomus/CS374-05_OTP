@@ -14,8 +14,7 @@ BUILD_DIR = build
 SHARED_SRC = $(wildcard $(SRC_DIR)/shared/*.c)
 KEYGEN_SRC = $(wildcard $(SRC_DIR)/keygen/*.c)
 SERVER_SRC = $(wildcard $(SRC_DIR)/server/*.c)
-ENC_CLIENT_SRC = $(wildcard $(SRC_DIR)/enc_client/*.c)
-DEC_CLIENT_SRC = $(wildcard $(SRC_DIR)/dec_client/*.c)
+CLIENT_SRC = $(wildcard $(SRC_DIR)/client/*.c)
 
 # Programs
 PROGRAMS = keygen dec_server dec_client enc_server enc_client
@@ -50,13 +49,13 @@ release_enc_server:
 	$(CC) $(CFLAGS) $(ENC_FLAG) $(RELEASE_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_server
 
 release_enc_client:
-	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(ENC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_client
+	$(CC) $(CFLAGS) $(ENC_FLAG) $(RELEASE_FLAGS) $(CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/enc_client
 
 release_dec_server:
 	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_server
 
 release_dec_client:
-	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(DEC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_client
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) $(CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/release/dec_client
 
 # Debug builds
 debug: debug_keygen debug_enc_server debug_enc_client debug_dec_server debug_dec_client
@@ -68,13 +67,13 @@ debug_enc_server:
 	$(CC) $(CFLAGS) $(ENC_FLAG) $(DEBUG_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_server
 
 debug_enc_client:
-	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(ENC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_client
+	$(CC) $(CFLAGS) $(ENC_FLAG) $(DEBUG_FLAGS) $(CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/enc_client
 
 debug_dec_server:
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(SERVER_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_server
 
 debug_dec_client:
-	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(DEC_CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_client
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(CLIENT_SRC) $(SHARED_SRC) -o $(BIN_DIR)/debug/dec_client
 
 # Clean up build and bin directories
 clean:
