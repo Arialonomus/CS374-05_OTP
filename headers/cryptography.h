@@ -21,6 +21,6 @@
 #define MODULO RAND_RANGE - 1
 
 // Returns a ciphertext char based on a passed in pair of plaintext char and key char
-char encrypt(char pair[]);
+char encrypt(const char pair[]);
 
 #endif //OTP_CRYPTOGRAPHY_H
