@@ -16,7 +16,6 @@
 #endif
 
 #include <err.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -39,9 +38,45 @@ int main(int argc, char* argv[])
     errx(EXIT_FAILURE, "invalid port number");
   }
   // Open the plaintext file
-  const int plaintext_fd = open(argv[2], O_RDONLY);
-  if (plaintext_fd == -1)
+  FILE* plaintext_file = fopen(argv[2], "r");
+  if (plaintext_file == NULL)
     err(EXIT_FAILURE, "open: %s", argv[2]);
+
+  // Read plaintext file into buffer
+  size_t buf_size = 256;
+  char* plaintext = malloc(buf_size);
+  size_t chars_read = 0;
+  char c = 0;
+  while (c != '\n') {
+    // Read a byte from file
+    const int byte = fgetc(plaintext_file);
+    if (byte == EOF && ferror(plaintext_file)) {
+      free(plaintext);
+      err(EXIT_FAILURE, "fgetc");
+    }
+
+    // Validate character
+    c = (char) byte;
+    if (c != ' ' && c != '\n' && (c < 'A' || c > 'Z')) {
+      free(plaintext);
+      errx(EXIT_FAILURE, "invalid character read from plaintext file");
+    }
+
+    // Place the character in the plaintex buffer, resizing if necessary
+    plaintext[chars_read] = c;
+    ++chars_read;
+    if (chars_read == buf_size - 1) {
+      buf_size *= 2;
+      void* tmp_ptr = realloc(plaintext, buf_size);
+      if(tmp_ptr == NULL) {
+        free(plaintext);
+        err(EXIT_FAILURE, "realloc");
+      }
+      plaintext = tmp_ptr;
+    }
+  }
+  fclose(plaintext_file);
+
   // Open the key file
   const int key_fd = open(argv[3], O_RDONLY);
   if (key_fd == -1)
@@ -88,8 +123,10 @@ int main(int argc, char* argv[])
 
   // Send plaintext and key to encryption server
 
-  // Fetch encrypted ciphertext from data stream
+
+  // Read encrypted ciphertext from data stream
 
   // Cleanup & Exit
+  free(plaintext);
   return EXIT_SUCCESS;
 }
