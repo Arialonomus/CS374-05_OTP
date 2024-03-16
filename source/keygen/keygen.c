@@ -20,12 +20,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <ctype.h>
-
-#define CHAR_MAX 90
-#define CHAR_MIN 65
-#define CHAR_OFFSET CHAR_MIN
-#define RAND_RANGE (CHAR_MAX - CHAR_MIN) + 2
-#define SPACE_VALUE RAND_RANGE - 1
+#include "cryptography.h"
 
 int main (int argc, char* argv[]) {
 
