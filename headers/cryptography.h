@@ -20,7 +20,10 @@
 #define SPACE_VALUE RAND_RANGE - 1
 #define MODULO RAND_RANGE - 1
 
-// Returns a ciphertext char based on a passed in pair of plaintext char and key char
-char encrypt(const char pair[]);
+// Returns an encoded ciphertext char based on a passed in pair of plaintext and key characters
+char encode(const char pair[]);
+
+// Returns a decoded plaintext char based on a passed in pair of ciphertext and key characters
+char decode(const char pair[]);
 
 #endif //OTP_CRYPTOGRAPHY_H
