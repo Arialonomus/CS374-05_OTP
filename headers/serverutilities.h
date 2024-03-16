@@ -18,8 +18,10 @@
 
 #include "cryptography.h"
 
-// Receive a key and plaintext from a client and send back an encrypted string
-void handle_encryption(int socket_fd);
+// Receive key/character pairs of text from a client and send back a single character
+// Server will either encode or decode the character using the key
+// depending on whether server code was compiled using the -DENC flag
+void handle_request(int socket_fd);
 
 // Fetches a pair of characters from a socket stream, returns 2 on success, 0 on EOF, otherwise returns -1
 int fetch_pair(int fd, char pair_buf[]);

@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
             // Child Process
             case 0:
                 close(server_socket);
-                handle_encryption(client_socket);
+                handle_request(client_socket);
                 goto exit; // Exit infinite loop when processing is complete
 
             // Parent Process

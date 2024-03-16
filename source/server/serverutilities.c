@@ -1,8 +1,8 @@
 #include "serverutilities.h"
 
-void handle_encryption(const int socket_fd)
+void handle_request(const int socket_fd)
 {
-   // Retrieve plaintext and a key and send back the encrypted ciphertext
+   // Retrieve text string and key string and send back the processed text
     for(;;) {
         // Read a pair of characters from the stream
         char pair[2];
@@ -18,9 +18,14 @@ void handle_encryption(const int socket_fd)
                 break;
         }
 
-        // Encrypt the characters and send back to client
-        char cipher = encrypt(pair);
-        if(write(socket_fd, &cipher, 1) == -1)
+        // Process the character using the key, using -DENC compilation flag to set program behavior
+        #ifdef ENC  // Encode character
+        char c = encode(pair);
+        #else       // Decode character
+        char c = decode(pair);
+        #endif
+
+        if(write(socket_fd, &c, 1) == -1)
             err(EXIT_FAILURE, "write");
     }
 }
