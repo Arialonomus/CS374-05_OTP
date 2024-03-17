@@ -28,7 +28,7 @@ int readfile(FILE* file, const char* filename, char** buffer, size_t* buf_size)
         // Place the character in the plaintext buffer, resizing if necessary
         if (chars_read == *buf_size) {
             *buf_size *= 2;
-            char* tmp_ptr = realloc(buffer, *buf_size);
+            char* tmp_ptr = realloc(*buffer, *buf_size);
             if (tmp_ptr == NULL) {
                 warn("realloc");
                 return -1;
