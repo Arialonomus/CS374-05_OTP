@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -63,19 +64,20 @@ int main(int argc, char* argv[])
         err(EXIT_FAILURE, "open: %s", key_filename);
 
     // Read key file into buffer
-    size_t key_buf_size = n_textchars;
     char* key = malloc(n_textchars);
-    if (key == NULL)
+    if (key == NULL) {
         err(EXIT_FAILURE, "malloc: key");
-    const int n_keychars = readfile(key_file, key_filename, &key, &key_buf_size);
-    if (n_keychars == -1) {
-        exit(EXIT_FAILURE);
+    }
+    if (fgets(key, n_textchars, key_file) == NULL) {
+        err(EXIT_FAILURE, "fgets");
     }
     fclose(text_file);
 
-    // Validate key and text are the same length
-    if (n_keychars != n_textchars)
-        errx(EXIT_FAILURE, "text and key strings are not the same length");
+    // Validate key and text are the same length and insert newline
+    const size_t n_keychars = strlen(key);
+    if (n_keychars < n_textchars - 1)
+        errx(EXIT_FAILURE, "key string is too short");
+    key[n_keychars] = '\n';
 
     // Attempt to open a connection to the socket at target port
     const int connection_fd = open_socket(port_num_str, CLIENT);
@@ -83,7 +85,7 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    // Send plaintext and key to encryption server in character pairs
+    // Send text and key to encryption server in character pairs
     for (int i = 0; i < n_textchars; ++i) {
         char pair[2];
         pair[CHAR_INDEX] = text[i];
@@ -95,7 +97,7 @@ int main(int argc, char* argv[])
     // Close write end of the socket
     shutdown(connection_fd, SHUT_WR);
 
-    // Read encrypted ciphertext from data stream
+    // Read processed text from data stream
     for(;;) {
         // Read a character from the stream
         char c = 0;
