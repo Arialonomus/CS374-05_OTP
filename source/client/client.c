@@ -85,25 +85,42 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
+    // Identify client to the server and get response
+    const int identifier = REQUEST_TYPE;
+    if (write(connection_fd, &identifier, 1) == -1)
+        err(EXIT_FAILURE, "write: identifier");
+    int response = 0;
+    if (read(connection_fd, &response, 1) == 0) {
+        #ifdef ENC  // Encode character
+        char* client = "encoding";
+        char* server = "decoding";
+        #else       // Decode character
+        char* client = "decoding";
+        char* server = "encoding";
+        #endif
+        errx(EXIT_FAILURE, "connection rejected, %s client cannot connect to %s server", client, server);
+    }
+
+
     // Send text and key to encryption server in character pairs
     for (int i = 0; i < n_textchars; ++i) {
         char pair[2];
         pair[CHAR_INDEX] = text[i];
         pair[KEY_INDEX] = key[i];
-        if(write(connection_fd, &pair, 2) == -1)
-            err(EXIT_FAILURE, "write");
+        if (write(connection_fd, &pair, 2) == -1)
+            err(EXIT_FAILURE, "write: pair %d", i);
     }
 
     // Close write end of the socket
     shutdown(connection_fd, SHUT_WR);
 
     // Read processed text from data stream
-    for(;;) {
+    for (;;) {
         // Read a character from the stream
         char c = 0;
         const int num_read = read(connection_fd, &c, 1);
         if (num_read == -1) {
-            if (errno == EINTR)     // Interrupted, retry on next loop
+            if (errno == EINTR) // Interrupted, retry on next loop
                 continue;
             err(EXIT_FAILURE, "read");
         }
@@ -111,7 +128,7 @@ int main(int argc, char* argv[])
             break;
 
         // Write the character to output
-        if(fputc(c, stdout) == EOF )
+        if (fputc(c, stdout) == EOF)
             err(EXIT_FAILURE, "fputc");
     }
     close(connection_fd);

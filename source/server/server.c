@@ -82,8 +82,20 @@ int main(int argc, char* argv[])
 
             // Child Process
             case 0:
+                // Unnecessary copy of listener socket
                 close(listener_fd);
-                handle_request(client_fd);
+
+                // Identify client before accepting data
+                int identifier = 0;
+                if(read(client_fd, &identifier, 1) < 1)
+                    err(EXIT_FAILURE, "read: identifier");
+                if (identifier != REQUEST_TYPE) {
+                    close(client_fd);
+                } else {
+                    if(write(client_fd, &identifier, 1) < 1)
+                        err(EXIT_FAILURE, "write: request acceptance");
+                    handle_request(client_fd);
+                }
                 goto exit; // Exit infinite loop when processing is complete
 
             // Parent Process

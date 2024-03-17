@@ -17,6 +17,12 @@
 #define HOSTNAME "localhost"
 #endif
 
+#ifdef ENC
+#define REQUEST_TYPE 110 // 'n' ENCODE
+#else
+#define REQUEST_TYPE 100 // 'd' DECODE
+#endif
+
 #include <err.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -25,7 +31,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
 // Defines the type of connector seeking to open a socket
 enum connector_t
 {
@@ -33,7 +38,7 @@ enum connector_t
     SERVER
 };
 
-// Attempts to open a TCP socket and connect or bind  to it,
+// Attempts to open a TCP socket and connect or bind to it,
 // depending on the type of the calling connector.
 // Returns the socket number on success, or -1 on error
 int open_socket(const char* port, const enum connector_t caller_t);
