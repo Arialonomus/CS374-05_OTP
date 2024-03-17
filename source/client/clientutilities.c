@@ -1,4 +1,4 @@
-#include "../../headers/clientutilities.h"
+#include "clientutilities.h"
 
 int readfile(FILE* file, const char* filename, char** buffer, size_t* buf_size)
 {
